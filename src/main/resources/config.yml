@@ -20,3 +20,6 @@ messages:
   challenge:
     phrase: "&bhas completed the challenge"
     advancement-color: "&d"
+
+# PLEASE DO NOT CHANGE THIS VALUE!
+plugin-version: 1
