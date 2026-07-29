@@ -1,0 +1,18 @@
+name: CustomPlayerAdvancements
+version: 1.0.0
+main: afx.customplayeradvancements.CustomPlayerAdvancements
+api-version: '26.2'
+
+depend:
+  - ProtocolLib
+  - PlaceholderAPI
+
+commands:
+  ancustomizer:
+    description: CustomPlayerAdvancements commands
+    usage: /ancustomizer <reload>
+
+permissions:
+  ancustomizer.reload:
+    description: Allows reloading the plugin
+    default: op

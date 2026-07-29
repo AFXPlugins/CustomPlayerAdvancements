@@ -1,0 +1,83 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>me.customadvancement</groupId>
+    <artifactId>CustomPlayerAdvancements</artifactId>
+    <version>1.0.0</version>
+    <name>CustomPlayerAdvancements</name>
+    <description>Displays a PlaceholderAPI-formatted name in advancement broadcast messages</description>
+
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
+    </repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>io.papermc.paper</groupId>
+        <artifactId>paper-api</artifactId>
+        <version>26.2.build.87-stable</version>
+        <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>net.dmulloy2</groupId>
+        <artifactId>ProtocolLib</artifactId>
+        <version>5.4.0</version>
+        <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>me.clip</groupId>
+        <artifactId>placeholderapi</artifactId>
+        <version>2.13.3</version>
+        <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.14.0</version>
+    </dependency>
+</dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>25</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
