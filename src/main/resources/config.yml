@@ -7,14 +7,16 @@
 # Supports any PlaceholderAPI placeholder and '&' colors.
 format: "%luckperms_prefix%%essentials_nickname%" 
 
-
 # Format for the main portion of the advancement message.
 messages:
   task:
-    format: "&bhas made the advancement &a"
+    phrase: "&bhas made the advancement"
+    advancement-color: "&a"
 
   goal:
-    format: "&bhas reached the goal &e"
+    phrase: "&bhas reached the goal"
+    advancement-color: "&e"
 
   challenge:
-    format: "&bhas completed the challenge &d"
+    phrase: "&bhas completed the challenge"
+    advancement-color: "&d"
