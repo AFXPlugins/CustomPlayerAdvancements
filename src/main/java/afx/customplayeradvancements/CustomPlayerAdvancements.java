@@ -35,10 +35,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -49,6 +53,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class CustomPlayerAdvancements extends JavaPlugin implements Listener, CommandExecutor, TabCompleter {
 
     private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
+
+    private static final String MODRINTH_PROJECT_SLUG = "customplayeradvancements";
+    private static final String MODRINTH_VERSIONS_API = "https://api.modrinth.com/v2/project/" + MODRINTH_PROJECT_SLUG + "/version";
+    private static final String MODRINTH_PROJECT_PAGE = "https://modrinth.com/project/" + MODRINTH_PROJECT_SLUG + "/versions";
 
     private final Map<String, String> decoratedNameCache = new ConcurrentHashMap<>();
     private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -62,6 +70,10 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
     private String goalMessageFormat;
     private String challengeMessageFormat;
 
+    private volatile boolean placeholderApiEnabled;
+    private volatile boolean updateAvailable;
+    private volatile String latestVersion;
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -70,11 +82,12 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
 
         protocolManager = ProtocolLibrary.getProtocolManager();
 
-        Plugin placeholderApiPlugin = Bukkit.getPluginManager().getPlugin("PlaceholderAPI");
-        if (placeholderApiPlugin == null) {
-            getLogger().severe("PlaceholderAPI was not found. Disabling plugin.");
-            Bukkit.getPluginManager().disablePlugin(this);
-            return;
+        placeholderApiEnabled = Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI");
+
+        if (placeholderApiEnabled) {
+            getLogger().info("PlaceholderAPI hooked successfully.");
+        } else {
+            getLogger().info("PlaceholderAPI not found. Placeholder support disabled.");
         }
 
         Bukkit.getPluginManager().registerEvents(this, this);
@@ -86,6 +99,8 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
 
         refreshAllOnlinePlayers();
         refreshTask = Bukkit.getScheduler().runTaskTimer(this, this::refreshAllOnlinePlayers, 20L, 20L * 60L);
+
+        checkForUpdatesAsync(null);
 
         protocolManager.addPacketListener(new PacketAdapter(
                 this,
@@ -127,9 +142,181 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
         return phrase + " " + color;
     }
 
+    /**
+     * Queries the Modrinth API for the latest published version of this plugin and compares
+     * it against the currently running version. Runs off the main thread.
+     *
+     * @param requester optional sender to report the result back to (may be null, e.g. on startup)
+     */
+    private void checkForUpdatesAsync(CommandSender requester) {
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            String newestVersion = fetchLatestModrinthVersion();
+
+            if (newestVersion == null) {
+                getLogger().warning("Could not check for updates on Modrinth.");
+                if (requester != null) {
+                    Bukkit.getScheduler().runTask(this, () ->
+                            sendMessage(requester, ChatColor.RED + "Could not reach Modrinth to check for updates."));
+                }
+                return;
+            }
+
+            String currentVersion = getDescription().getVersion();
+            boolean isNewer = isVersionNewer(newestVersion, currentVersion);
+
+            latestVersion = newestVersion;
+            updateAvailable = isNewer;
+
+            if (isNewer) {
+                getLogger().warning("A new version of CustomPlayerAdvancements is available: "
+                        + newestVersion + " (running " + currentVersion + "). Download: " + MODRINTH_PROJECT_PAGE);
+            } else {
+                getLogger().info("CustomPlayerAdvancements is up to date (" + currentVersion + ").");
+            }
+
+            if (requester != null) {
+                Bukkit.getScheduler().runTask(this, () -> {
+                    if (isNewer) {
+                        sendMessage(requester, ChatColor.GREEN + "A new version (" + newestVersion
+                                + ") is available. You are running " + currentVersion + ".");
+                        sendMessage(requester, ChatColor.AQUA + MODRINTH_PROJECT_PAGE);
+                    } else {
+                        sendMessage(requester, ChatColor.GREEN + "You are running the latest version ("
+                                + currentVersion + ").");
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Fetches every published version from Modrinth and returns the version_number of the most
+     * recently published one, or null if the lookup failed.
+     */
+    private String fetchLatestModrinthVersion() {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) URI.create(MODRINTH_VERSIONS_API).toURL().openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("User-Agent", "CustomPlayerAdvancements/" + getDescription().getVersion() + " (Modrinth update checker)");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            int status = connection.getResponseCode();
+            if (status != 200) {
+                connection.disconnect();
+                return null;
+            }
+
+            StringBuilder body = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    body.append(line);
+                }
+            } finally {
+                connection.disconnect();
+            }
+
+            JsonElement rootElement = JsonParser.parseString(body.toString());
+            if (!rootElement.isJsonArray()) {
+                return null;
+            }
+
+            JsonArray versions = rootElement.getAsJsonArray();
+            String newestVersionNumber = null;
+            String newestDatePublished = null;
+
+            for (JsonElement versionElement : versions) {
+                if (!versionElement.isJsonObject()) {
+                    continue;
+                }
+
+                JsonObject versionObject = versionElement.getAsJsonObject();
+                String versionNumber = getString(versionObject, "version_number");
+                String datePublished = getString(versionObject, "date_published");
+
+                if (versionNumber == null || datePublished == null) {
+                    continue;
+                }
+
+                if (newestDatePublished == null || datePublished.compareTo(newestDatePublished) > 0) {
+                    newestDatePublished = datePublished;
+                    newestVersionNumber = versionNumber;
+                }
+            }
+
+            return newestVersionNumber;
+        } catch (Exception ex) {
+            getLogger().warning("Error checking Modrinth for updates: " + ex.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Compares two dotted/numeric version strings (e.g. "1.2.10" vs "1.3"), ignoring any
+     * non-numeric suffix such as "-beta". Returns true if 'candidate' is newer than 'current'.
+     */
+    private boolean isVersionNewer(String candidate, String current) {
+        if (candidate == null || candidate.isBlank()) {
+            return false;
+        }
+        if (current == null || current.isBlank()) {
+            return true;
+        }
+
+        int[] candidateParts = parseVersionParts(candidate);
+        int[] currentParts = parseVersionParts(current);
+        int length = Math.max(candidateParts.length, currentParts.length);
+
+        for (int i = 0; i < length; i++) {
+            int candidatePart = i < candidateParts.length ? candidateParts[i] : 0;
+            int currentPart = i < currentParts.length ? currentParts[i] : 0;
+
+            if (candidatePart != currentPart) {
+                return candidatePart > currentPart;
+            }
+        }
+
+        return false;
+    }
+
+    private int[] parseVersionParts(String version) {
+        String numericPrefix = version.trim();
+        int cut = numericPrefix.length();
+        for (int i = 0; i < numericPrefix.length(); i++) {
+            char c = numericPrefix.charAt(i);
+            if (!Character.isDigit(c) && c != '.') {
+                cut = i;
+                break;
+            }
+        }
+        numericPrefix = numericPrefix.substring(0, cut);
+
+        String[] rawParts = numericPrefix.split("\\.");
+        int[] parts = new int[rawParts.length];
+        for (int i = 0; i < rawParts.length; i++) {
+            try {
+                parts[i] = rawParts[i].isEmpty() ? 0 : Integer.parseInt(rawParts[i]);
+            } catch (NumberFormatException ex) {
+                parts[i] = 0;
+            }
+        }
+        return parts;
+    }
+
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         refreshPlayerCache(event.getPlayer());
+
+        Player player = event.getPlayer();
+        if (updateAvailable && (player.isOp() || player.hasPermission("ancustomizer.update"))) {
+            sendMessage(player, ChatColor.YELLOW + "[CustomPlayerAdvancements] "
+                    + ChatColor.GREEN + "A new version (" + latestVersion + ") is available. "
+                    + ChatColor.GRAY + "You are running " + getDescription().getVersion() + ". "
+                    + ChatColor.AQUA + MODRINTH_PROJECT_PAGE);
+        }
     }
 
     @EventHandler
@@ -166,6 +353,17 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
                 return true;
             }
 
+            case "update" -> {
+                if (!hasPermission(sender, "ancustomizer.update")) {
+                    sendMessage(sender, ChatColor.RED + "You do not have permission to do that.");
+                    return true;
+                }
+
+                sendMessage(sender, ChatColor.GRAY + "Checking Modrinth for updates...");
+                checkForUpdatesAsync(sender);
+                return true;
+            }
+
             default -> {
                 sendUsage(sender, label);
                 return true;
@@ -178,6 +376,7 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
         if (args.length == 1) {
             List<String> options = new ArrayList<>();
             options.add("reload");
+            options.add("update");
             return filterCompletions(options, args[0]);
         }
 
@@ -198,6 +397,7 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
     private void sendUsage(CommandSender sender, String label) {
         sendMessage(sender, ChatColor.YELLOW + "Usage:");
         sendMessage(sender, ChatColor.GRAY + "/" + label + " reload");
+        sendMessage(sender, ChatColor.GRAY + "/" + label + " update");
     }
 
     private boolean hasPermission(CommandSender sender, String permission) {
@@ -216,11 +416,22 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
 
     private String buildDecoratedName(Player player) {
         String formatted;
+
         try {
-            formatted = PlaceholderAPI.setPlaceholders(player, nameFormat);
+            if (placeholderApiEnabled) {
+                formatted = PlaceholderAPI.setPlaceholders(player, nameFormat);
+            } else {
+                formatted = nameFormat.replace("%player_name%", player.getName());
+            }
         } catch (Exception ex) {
-            getLogger().warning("Error resolving placeholders for " + player.getName() + ": " + ex.getMessage());
-            formatted = nameFormat;
+            getLogger().warning(
+                    "Error resolving placeholders for "
+                            + player.getName()
+                            + ": "
+                            + ex.getMessage()
+            );
+
+            formatted = player.getName();
         }
 
         formatted = colorizeLegacy(formatted);
