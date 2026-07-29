@@ -116,9 +116,15 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
     private void loadSettings() {
         nameFormat = getConfig().getString("format", "%luckperms_prefix%%essentials_nickname%");
 
-        taskMessageFormat = getConfig().getString("messages.task.format", "&bhas made the advancement &a");
-        goalMessageFormat = getConfig().getString("messages.goal.format", "&bhas reached the goal &e");
-        challengeMessageFormat = getConfig().getString("messages.challenge.format", "&bhas completed the challenge &d");
+        taskMessageFormat = buildMessageFormat("messages.task", "&bhas made the advancement", "&a");
+        goalMessageFormat = buildMessageFormat("messages.goal", "&bhas reached the goal", "&e");
+        challengeMessageFormat = buildMessageFormat("messages.challenge", "&bhas completed the challenge", "&d");
+    }
+
+    private String buildMessageFormat(String path, String defaultPhrase, String defaultColor) {
+        String phrase = getConfig().getString(path + ".phrase", defaultPhrase);
+        String color = getConfig().getString(path + ".advancement-color", defaultColor);
+        return phrase + " " + color;
     }
 
     @EventHandler
