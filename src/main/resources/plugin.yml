@@ -5,6 +5,8 @@ api-version: '26.2'
 
 depend:
   - ProtocolLib
+
+softdepend:
   - PlaceholderAPI
 
 commands:
