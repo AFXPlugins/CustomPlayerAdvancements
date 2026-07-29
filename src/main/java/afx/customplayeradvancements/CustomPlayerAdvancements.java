@@ -1,4 +1,4 @@
-package me.customadvancement;
+package afx.customplayeradvancements;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
