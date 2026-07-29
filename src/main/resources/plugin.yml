@@ -13,6 +13,10 @@ commands:
   ancustomizer:
     description: CustomPlayerAdvancements commands
     usage: /ancustomizer <reload>
+    aliases:
+      - advancementnamecustomizer
+      - anc
+      - advancements
 
 permissions:
   ancustomizer.reload:
