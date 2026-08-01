@@ -1,0 +1,25 @@
+# Reload command: /ancustomizer reload
+
+# How to use PlaceholderAPI placeholders:
+# https://wiki.placeholderapi.com/users/using-placeholders/
+
+# Format for the name portion of the advancement message that replaces the player name.
+# Supports any PlaceholderAPI placeholder and '&' colors.
+format: "%luckperms_prefix%%essentials_nickname%" 
+
+# Format for the main portion of the advancement message.
+messages:
+  task:
+    phrase: "&bhas made the advancement"
+    advancement-color: "&a"
+
+  goal:
+    phrase: "&bhas reached the goal"
+    advancement-color: "&e"
+
+  challenge:
+    phrase: "&bhas completed the challenge"
+    advancement-color: "&d"
+
+# PLEASE DO NOT CHANGE THIS VALUE!
+plugin-version: 1

@@ -1,0 +1,27 @@
+name: CustomPlayerAdvancements
+version: 1.0.0
+main: afx.customplayeradvancements.CustomPlayerAdvancements
+api-version: '26.2'
+
+depend:
+  - packetevents
+
+softdepend:
+  - PlaceholderAPI
+
+commands:
+  advancementcustomizer:
+    description: CustomPlayerAdvancements commands
+    usage: /advancementcustomizer <reload|update>
+    aliases:
+      - ancustomizer
+      - advancementnamecustomizer
+      - anc
+      - advancements
+    permission: advancementcustomizer.admin
+    permission-message: You do not have permission to use this command.
+
+permissions:
+  advancementcustomizer.admin:
+    description: Allows use of /advancementcustomizer reload, update, and other admin actions.
+    default: op
