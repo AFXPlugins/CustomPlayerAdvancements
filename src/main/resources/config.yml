@@ -5,7 +5,8 @@
 
 # Format for the name portion of the advancement message that replaces the player name.
 # Supports any PlaceholderAPI placeholder and '&' colors.
-format: "%luckperms_prefix%%essentials_nickname%" 
+# Example: %luckperms_prefix%%essentials_nickname%
+format: "%player_name%" 
 
 # Format for the main portion of the advancement message.
 messages:
