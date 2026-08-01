@@ -288,8 +288,8 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
 
     private void sendUsage(CommandSender sender, String label) {
         sendMessage(sender, ChatColor.YELLOW + "Usage:");
-        sendMessage(sender, ChatColor.GRAY + "/" + label + " reload");
-        sendMessage(sender, ChatColor.GRAY + "/" + label + " update");
+        sendMessage(sender, ChatColor.WHITE + "/" + label + " reload " + ChatColor.GRAY + "- Reload the plugin.");
+        sendMessage(sender, ChatColor.WHITE + "/" + label + " update " + ChatColor.GRAY + "- Check plugin for updates.");
     }
 
     private boolean hasPermission(CommandSender sender, String permission) {
