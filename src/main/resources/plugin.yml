@@ -2,6 +2,9 @@ name: CustomPlayerAdvancements
 version: 1.0.0
 main: afx.customplayeradvancements.CustomPlayerAdvancements
 api-version: '26.2'
+author: AFXPlugins
+description: >
+  Fully customizable advancement messages.
 
 depend:
   - packetevents
@@ -10,7 +13,7 @@ softdepend:
   - PlaceholderAPI
 
 commands:
-  customplayeradvancements:
+  advancements:
     description: CustomPlayerAdvancements commands
     usage: /advancements <reload|update>
     aliases:
