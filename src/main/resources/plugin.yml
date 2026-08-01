@@ -23,5 +23,5 @@ commands:
 
 permissions:
   advancementcustomizer.admin:
-    description: Allows use of /advancementcustomizer reload, update, and other admin actions.
+    description: Allows use of all CustomPlayerAdvancement commands.
     default: op
