@@ -29,5 +29,4 @@ messages:
 ## Commands
 - `/ancustomizer reload` — Reloads the plugin configuration. Requires `ancustomizer.reload` (default: OP).
 ## Permissions
-- `ancustomizer.reload` — Allows reloading the plugin configuration.
-- `ancustomizer.update` — Allows receiving a notification on join when a new plugin version is available on Modrinth.
+- `advancementcustomizer.admin` — Allows use of all CustomPlayerAdvancement commands.
