@@ -49,7 +49,7 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
 
     private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
 
-    private static final String ADMIN_PERMISSION = "advancementcustomizer.admin";
+    private static final String ADMIN_PERMISSION = "customplayeradvancements.admin";
 
     private final Map<String, String> decoratedNameCache = new ConcurrentHashMap<>();
     private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -89,9 +89,9 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
 
         Bukkit.getPluginManager().registerEvents(this, this);
 
-        if (getCommand("advancementcustomizer") != null) {
-            getCommand("advancementcustomizer").setExecutor(this);
-            getCommand("advancementcustomizer").setTabCompleter(this);
+        if (getCommand("customplayeradvancements") != null) {
+            getCommand("customplayeradvancements").setExecutor(this);
+            getCommand("customplayeradvancements").setTabCompleter(this);
         }
 
         refreshAllOnlinePlayers();
@@ -140,7 +140,7 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
     /**
      * Logs the outcome of an {@link UpdateChecker} run to console. Used
      * both for the automatic startup check and for
-     * {@code /advancementcustomizer update} when it's run from the console.
+     * {@code /customplayeradvancements update} when it's run from the console.
      */
     public void logUpdateCheckResult(UpdateChecker.Result result) {
         if (!result.isSuccess()) {
@@ -172,7 +172,7 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
     /**
      * Messages an admin on join if a newer plugin version is already known
      * to be available. Uses whatever {@link UpdateChecker} last found (from
-     * the startup check, or a since-run {@code /advancementcustomizer update})
+     * the startup check, or a since-run {@code /customplayeradvancements update})
      * rather than firing a fresh Modrinth request for every join — that
      * result is cached specifically so this stays free.
      */
@@ -247,7 +247,7 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
         }
     }
 
-    /** Reports the outcome of an {@link UpdateChecker} run to whoever ran {@code /advancementcustomizer update}. */
+    /** Reports the outcome of an {@link UpdateChecker} run to whoever ran {@code /customplayeradvancements update}. */
     private void sendUpdateCheckResult(CommandSender sender, UpdateChecker.Result result) {
         if (!result.isSuccess()) {
             sendMessage(sender, ChatColor.RED + "Could not check for updates: " + result.getFailureReason());

@@ -10,18 +10,15 @@ softdepend:
   - PlaceholderAPI
 
 commands:
-  advancementcustomizer:
+  customplayeradvancements:
     description: CustomPlayerAdvancements commands
-    usage: /advancementcustomizer <reload|update>
+    usage: /advancements <reload|update>
     aliases:
-      - ancustomizer
-      - advancementnamecustomizer
-      - anc
-      - advancements
-    permission: advancementcustomizer.admin
+      - customplayeradvancements
+    permission: customplayeradvancements.admin
     permission-message: You do not have permission to use this command.
 
 permissions:
-  advancementcustomizer.admin:
+  customplayeradvancements.admin:
     description: Allows use of all CustomPlayerAdvancement commands.
     default: op
