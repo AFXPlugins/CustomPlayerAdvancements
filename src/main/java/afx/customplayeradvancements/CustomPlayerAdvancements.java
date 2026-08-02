@@ -127,15 +127,14 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
     private void loadSettings() {
         nameFormat = getConfig().getString("player-name-format", "%player_name%");
 
-        taskMessageFormat = buildMessageFormat("messages.task", "&bhas made the advancement", "&a");
-        goalMessageFormat = buildMessageFormat("messages.goal", "&bhas reached the goal", "&e");
-        challengeMessageFormat = buildMessageFormat("messages.challenge", "&bhas completed the challenge", "&d");
+        taskMessageFormat = buildMessageFormat("messages.task", "&fhas made the advancement", "&a");
+        goalMessageFormat = buildMessageFormat("messages.goal", "&fhas reached the goal", "&a");
+        challengeMessageFormat = buildMessageFormat("messages.challenge", "&fhas completed the challenge", "&5");
     }
 
-    private String buildMessageFormat(String path, String defaultPhrase, String defaultColor) {
+    private String buildMessageFormat(String path, String defaultPhrase, String advancementColor) {
         String phrase = getConfig().getString(path + ".phrase", defaultPhrase);
-        String color = getConfig().getString(path + ".advancement-color", defaultColor);
-        return phrase + " " + color;
+        return phrase + " " + advancementColor;
     }
 
     /**
@@ -354,7 +353,7 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
             if (placeholderApiEnabled) {
                 formatted = PlaceholderAPI.setPlaceholders(player, nameFormat);
             } else {
-                formatted = nameFormat.replace("%player_name%", player.getName());
+                formatted = player.getName();
             }
         } catch (Exception ex) {
             getLogger().warning(
@@ -477,8 +476,8 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
         TextColor advancementColor = parseColor(ChatColor.getLastColors(colorizedMessage), NamedTextColor.WHITE);
 
         // The hover shows the advancement title followed by its description,
-        // both colored with this type's configured advancement-color, so the
-        // preview reflects the admin's actual config end-to-end.
+        // both colored with this type's hardcoded advancement-color, so the
+        // preview reflects the actual message end-to-end.
         Component hoverText = Component.text(type.getPreviewName(), advancementColor)
                 .append(Component.newline())
                 .append(Component.text(type.getPreviewDescription(), advancementColor));

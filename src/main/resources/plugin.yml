@@ -16,8 +16,7 @@ commands:
   advancements:
     description: CustomPlayerAdvancements commands
     usage: /advancements <reload|update|preview>
-    aliases:
-      - customplayeradvancements
+    aliases: [customplayeradvancements]
     permission: customplayeradvancements.admin
     permission-message: You do not have permission to use this command.
 

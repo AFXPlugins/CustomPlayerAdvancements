@@ -10,7 +10,7 @@
 ## Commands
 - `/advancements reload` — Reload plugin.
 - `/advancements update` — Check plugin for updates.
-- `/advancements preview [task|goal|challenge]` — Preview advancement message.
+- `/advancements preview [challenge|goal|task]` — Preview advancement message.
 
 ## Permissions
 - `customplayeradvancements.admin` — Allows use of all CustomPlayerAdvancements commands (default: OP).

@@ -18,6 +18,8 @@
 #
 # Format for the player name in advancement messages.
 # Supports any PlaceholderAPI placeholder and '&' colors.
+
+# Default: %player_name%
 # Example: %luckperms_prefix%%essentials_nickname%
 player-name-format: "%player_name%"
 # ========================================================================
@@ -26,20 +28,23 @@ player-name-format: "%player_name%"
 # ========================================================================
 #                       Advancement Message Formats
 # ========================================================================
-# advancement-color = Color of advancement name and hover box text.
+# default messages:
+#   Task: "&fhas made the advancement"
+#   Goal: "&fhas reached the goal"
+#   Challenge: "&fhas completed the challenge"
 messages:
   task:
     phrase: "&fhas made the advancement"
-    advancement-color: "&a"
 
   goal:
     phrase: "&fhas reached the goal"
-    advancement-color: "&a"
 
   challenge:
     phrase: "&fhas completed the challenge"
-    advancement-color: "&5"
 # ========================================================================
+
+
+
 
 # =================================
 # PLEASE DO NOT CHANGE THIS VALUE!
