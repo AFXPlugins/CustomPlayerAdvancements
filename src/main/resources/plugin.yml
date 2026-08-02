@@ -15,7 +15,7 @@ softdepend:
 commands:
   advancements:
     description: CustomPlayerAdvancements commands
-    usage: /advancements <reload|update>
+    usage: /advancements <reload|update|preview>
     aliases:
       - customplayeradvancements
     permission: customplayeradvancements.admin

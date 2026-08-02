@@ -6,3 +6,11 @@
 ## Requirements
 - [PacketEvents](https://modrinth.com/plugin/packetevents) (required - plugin functionality)
 - [PlaceholderAPI](https://modrinth.com/plugin/placeholderapi) (required - placeholder support)
+
+## Commands
+- `/advancements reload` — Reload plugin.
+- `/advancements update` — Check plugin for updates.
+- `/advancements preview [task|goal|challenge]` — Preview advancement message.
+
+## Permissions
+- `customplayeradvancements.admin` — Allows use of all CustomPlayerAdvancements commands (default: OP).

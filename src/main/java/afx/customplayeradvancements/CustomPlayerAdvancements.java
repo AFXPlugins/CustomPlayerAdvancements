@@ -17,6 +17,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -124,7 +125,7 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
     }
 
     private void loadSettings() {
-        nameFormat = getConfig().getString("format", "%player_name%");
+        nameFormat = getConfig().getString("player-name-format", "%player_name%");
 
         taskMessageFormat = buildMessageFormat("messages.task", "&bhas made the advancement", "&a");
         goalMessageFormat = buildMessageFormat("messages.goal", "&bhas reached the goal", "&e");
@@ -240,6 +241,26 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
                 return true;
             }
 
+            case "preview" -> {
+                if (!(sender instanceof Player)) {
+                    sendMessage(sender, ChatColor.RED + "Only players can preview advancement messages.");
+                    return true;
+                }
+
+                AdvancementType type = AdvancementType.TASK;
+                if (args.length >= 2) {
+                    type = parsePreviewType(args[1]);
+                    if (type == null) {
+                        sendMessage(sender, ChatColor.RED + "Unknown preview type '" + args[1]
+                                + "'. Use task, goal, or challenge.");
+                        return true;
+                    }
+                }
+
+                sendPreviewAdvancement((Player) sender, type);
+                return true;
+            }
+
             default -> {
                 sendUsage(sender, label);
                 return true;
@@ -269,10 +290,29 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
             List<String> options = new ArrayList<>();
             options.add("reload");
             options.add("update");
+            options.add("preview");
             return filterCompletions(options, args[0]);
         }
 
+        if (args.length == 2 && args[0].equalsIgnoreCase("preview")) {
+            List<String> options = new ArrayList<>();
+            options.add("task");
+            options.add("goal");
+            options.add("challenge");
+            return filterCompletions(options, args[1]);
+        }
+
         return Collections.emptyList();
+    }
+
+    /** Parses a {@code /advancements preview <type>} argument into an {@link AdvancementType}, or null if invalid. */
+    private AdvancementType parsePreviewType(String input) {
+        return switch (input.toLowerCase(Locale.ROOT)) {
+            case "task" -> AdvancementType.TASK;
+            case "goal" -> AdvancementType.GOAL;
+            case "challenge" -> AdvancementType.CHALLENGE;
+            default -> null;
+        };
     }
 
     private List<String> filterCompletions(List<String> options, String input) {
@@ -290,6 +330,7 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
         sendMessage(sender, ChatColor.RED + "Usages:");
         sendMessage(sender, ChatColor.WHITE + "/" + label + " reload " + ChatColor.YELLOW + "- Reload plugin.");
         sendMessage(sender, ChatColor.WHITE + "/" + label + " update " + ChatColor.YELLOW + "- Check plugin for updates.");
+        sendMessage(sender, ChatColor.WHITE + "/" + label + " preview [task|goal|challenge] " + ChatColor.YELLOW + "- Preview an advancement message with your current config. Defaults to task.");
     }
 
     private boolean hasPermission(CommandSender sender, String permission) {
@@ -411,6 +452,48 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
         // Required whenever a packet is mutated through a wrapper - tells PacketEvents to
         // actually write the changes back out, otherwise they're silently dropped.
         event.markForReEncode(true);
+    }
+
+    /**
+     * Sends {@code player} a mock advancement message built with the exact same
+     * pipeline as {@link #rewriteAdvancementMessage(PacketSendEvent)} (decorated
+     * name, colorized phrase, parsed advancement color), so admins can check the
+     * effect of config changes without actually earning an advancement. Nothing
+     * is broadcast — this goes to the invoking player only.
+     * <p>
+     * {@code type} picks which {@code messages.*} section is previewed and which
+     * fixed, safe-to-fake vanilla advancement stands in for it: {@link AdvancementType#TASK}
+     * uses "Diamonds!" (story/mine_diamond), {@link AdvancementType#GOAL} uses
+     * "The End... Again..." (end/respawn_dragon), and {@link AdvancementType#CHALLENGE}
+     * uses "Adventuring Time" (adventure/adventuring_time) — none of these touch a real
+     * advancement or grant progress.
+     */
+    private void sendPreviewAdvancement(Player player, AdvancementType type) {
+        Component playerComponent = LEGACY.deserialize(buildDecoratedName(player));
+
+        String colorizedMessage = colorizeLegacy(getMessageFormat(type));
+        Component phraseComponent = LEGACY.deserialize(colorizedMessage);
+
+        TextColor advancementColor = parseColor(ChatColor.getLastColors(colorizedMessage), NamedTextColor.WHITE);
+
+        // The hover shows the advancement title followed by its description,
+        // both colored with this type's configured advancement-color, so the
+        // preview reflects the admin's actual config end-to-end.
+        Component hoverText = Component.text(type.getPreviewName(), advancementColor)
+                .append(Component.newline())
+                .append(Component.text(type.getPreviewDescription(), advancementColor));
+
+        Component advancementComponent = Component.text("[" + type.getPreviewName() + "]")
+                .color(advancementColor)
+                .hoverEvent(HoverEvent.showText(hoverText));
+
+        Component rebuilt = Component.empty()
+                .append(playerComponent)
+                .append(Component.space())
+                .append(phraseComponent)
+                .append(advancementComponent);
+
+        player.sendMessage(rebuilt);
     }
 
     private String getMessageFormat(AdvancementType type) {
@@ -564,9 +647,28 @@ public final class CustomPlayerAdvancements extends JavaPlugin implements Listen
     }
 
     private enum AdvancementType {
-        TASK,
-        GOAL,
-        CHALLENGE;
+        // Real vanilla advancements, chosen because they're short, familiar, and
+        // safe to fake for /advancements preview — none of these touch a real
+        // advancement or grant progress.
+        TASK("Diamonds!", "Acquire diamonds"),
+        GOAL("The End... Again...", "Respawn the ender dragon"),
+        CHALLENGE("Adventuring Time", "Discover every biome");
+
+        private final String previewName;
+        private final String previewDescription;
+
+        AdvancementType(String previewName, String previewDescription) {
+            this.previewName = previewName;
+            this.previewDescription = previewDescription;
+        }
+
+        String getPreviewName() {
+            return previewName;
+        }
+
+        String getPreviewDescription() {
+            return previewDescription;
+        }
 
         static AdvancementType fromTranslationKey(String key) {
             if (key == null) {
