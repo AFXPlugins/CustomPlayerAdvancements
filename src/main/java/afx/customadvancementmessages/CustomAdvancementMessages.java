@@ -1,6 +1,6 @@
-package afx.customplayeradvancements;
+package afx.customadvancementmessages;
 
-import afx.customplayeradvancements.update.UpdateChecker;
+import afx.customadvancementmessages.update.UpdateChecker;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
@@ -46,7 +46,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class CustomPlayerAdvancements extends JavaPlugin implements Listener, CommandExecutor, TabCompleter {
+public final class CustomAdvancementMessages extends JavaPlugin implements Listener, CommandExecutor, TabCompleter {
 
     private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
 

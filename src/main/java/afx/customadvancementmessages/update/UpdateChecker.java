@@ -1,6 +1,6 @@
-package afx.customplayeradvancements.update;
+package afx.customadvancementmessages.update;
 
-import afx.customplayeradvancements.CustomPlayerAdvancements;
+import afx.customadvancementmessages.CustomAdvancementMessages;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -31,26 +31,26 @@ import java.util.function.Consumer;
  */
 public final class UpdateChecker {
 
-    private static final String PROJECT_SLUG = "customplayeradvancements";
+    private static final String PROJECT_SLUG = "customadvancementmessages";
     private static final String VERSIONS_API_URL =
             "https://api.modrinth.com/v2/project/" + PROJECT_SLUG + "/version";
     private static final String PROJECT_PAGE_URL = "https://modrinth.com/plugin/" + PROJECT_SLUG;
 
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
 
-    private final CustomPlayerAdvancements plugin;
+    private final CustomAdvancementMessages plugin;
     private final HttpClient httpClient;
 
     /**
      * Result of the most recently *completed* check. Cached so callers like
      * the join listener can show an already-known result instantly instead
      * of firing a fresh Modrinth request on every single join — only the
-     * startup check and {@code /advancementcustomizer update} actually hit
+     * startup check and {@code /advancements update} actually hit
      * the network.
      */
     private volatile Result lastResult;
 
-    public UpdateChecker(CustomPlayerAdvancements plugin) {
+    public UpdateChecker(CustomAdvancementMessages plugin) {
         this.plugin = plugin;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(REQUEST_TIMEOUT)
@@ -82,7 +82,7 @@ public final class UpdateChecker {
                     // Modrinth blocks/deprioritizes generic HTTP-client user
                     // agents — they ask for the app name and, ideally, a
                     // way to reach it. See docs.modrinth.com/api/#overview.
-                    .header("User-Agent", "AFXPlugins/CustomPlayerAdvancements/"
+                    .header("User-Agent", "AFXPlugins/CustomAdvancementMessages/"
                             + plugin.getDescription().getVersion() + " (" + PROJECT_PAGE_URL + ")")
                     .GET()
                     .build();
@@ -211,7 +211,7 @@ public final class UpdateChecker {
         private final String failureReason;
 
         private Result(boolean success, boolean updateAvailable, String latestVersion,
-                        String releaseUrl, String failureReason) {
+                       String releaseUrl, String failureReason) {
             this.success = success;
             this.updateAvailable = updateAvailable;
             this.latestVersion = latestVersion;

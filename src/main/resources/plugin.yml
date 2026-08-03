@@ -1,6 +1,6 @@
-name: CustomPlayerAdvancements
+name: CustomAdvancementMessages
 version: 1.0.0
-main: afx.customplayeradvancements.CustomPlayerAdvancements
+main: afx.customadvancementmessages.CustomAdvancementMessages
 api-version: '26.2'
 author: AFXPlugins
 description: >
@@ -14,13 +14,13 @@ softdepend:
 
 commands:
   advancements:
-    description: CustomPlayerAdvancements commands
+    description: CustomAdvancementMessages commands
     usage: /advancements <reload|update|preview>
-    aliases: [customplayeradvancements]
-    permission: customplayeradvancements.admin
+    aliases: [customadvancementmessages]
+    permission: customadvancementmessages.admin
     permission-message: You do not have permission to use this command.
 
 permissions:
-  customplayeradvancements.admin:
-    description: Allows use of all CustomPlayerAdvancement commands.
+  customadvancementmessages.admin:
+    description: Allows use of all CustomAdvancementMessages commands.
     default: op
