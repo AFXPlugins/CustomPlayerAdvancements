@@ -50,7 +50,7 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
 
     private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
 
-    private static final String ADMIN_PERMISSION = "customplayeradvancements.admin";
+    private static final String ADMIN_PERMISSION = "customadvancementmessages.admin";
 
     private final Map<String, String> decoratedNameCache = new ConcurrentHashMap<>();
     private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -90,9 +90,9 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
 
         Bukkit.getPluginManager().registerEvents(this, this);
 
-        if (getCommand("customplayeradvancements") != null) {
-            getCommand("customplayeradvancements").setExecutor(this);
-            getCommand("customplayeradvancements").setTabCompleter(this);
+        if (getCommand("customadvancementmessages") != null) {
+            getCommand("customadvancementmessages").setExecutor(this);
+            getCommand("customadvancementmessages").setTabCompleter(this);
         }
 
         refreshAllOnlinePlayers();
@@ -110,7 +110,7 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
             }
         });
 
-        getLogger().info("CustomPlayerAdvancements enabled.");
+        getLogger().info("CustomAdvancementMessages enabled.");
     }
 
     @Override
@@ -121,7 +121,7 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
         }
         decoratedNameCache.clear();
         PacketEvents.getAPI().terminate();
-        getLogger().info("CustomPlayerAdvancements disabled.");
+        getLogger().info("CustomAdvancementMessages disabled.");
     }
 
     private void loadSettings() {
@@ -140,20 +140,20 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
     /**
      * Logs the outcome of an {@link UpdateChecker} run to console. Used
      * both for the automatic startup check and for
-     * {@code /customplayeradvancements update} when it's run from the console.
+     * {@code /customadvancementmessages update} when it's run from the console.
      */
     public void logUpdateCheckResult(UpdateChecker.Result result) {
         if (!result.isSuccess()) {
-            getLogger().warning("Could not check for CustomPlayerAdvancements updates: "
+            getLogger().warning("Could not check for CustomAdvancementMessages updates: "
                     + result.getFailureReason());
             return;
         }
         if (result.isUpdateAvailable()) {
-            getLogger().warning("A new version of CustomPlayerAdvancements is available: v"
+            getLogger().warning("A new version of CustomAdvancementMessages is available: v"
                     + result.getLatestVersion() + " (currently running v"
                     + getDescription().getVersion() + "). Get it here: " + result.getReleaseUrl());
         } else {
-            getLogger().info("CustomPlayerAdvancements is up to date (v"
+            getLogger().info("CustomAdvancementMessages is up to date (v"
                     + getDescription().getVersion() + ").");
         }
     }
@@ -172,7 +172,7 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
     /**
      * Messages an admin on join if a newer plugin version is already known
      * to be available. Uses whatever {@link UpdateChecker} last found (from
-     * the startup check, or a since-run {@code /customplayeradvancements update})
+     * the startup check, or a since-run {@code /customadvancementmessages update})
      * rather than firing a fresh Modrinth request for every join — that
      * result is cached specifically so this stays free.
      */
@@ -187,7 +187,7 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
         if (result == null || !result.isUpdateAvailable()) {
             return;
         }
-        sendMessage(player, ChatColor.YELLOW + "[CustomPlayerAdvancements] "
+        sendMessage(player, ChatColor.YELLOW + "[CustomAdvancementMessages] "
                 + ChatColor.WHITE + "A new version is available: " + ChatColor.GREEN + "v" + result.getLatestVersion()
                 + ChatColor.GRAY + " (you're running v" + getDescription().getVersion() + "). "
                 + ChatColor.WHITE + result.getReleaseUrl());
@@ -223,7 +223,7 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
                 decoratedNameCache.clear();
                 refreshAllOnlinePlayers();
 
-                sendMessage(sender, ChatColor.GREEN + "CustomPlayerAdvancements reloaded.");
+                sendMessage(sender, ChatColor.GREEN + "CustomAdvancementMessages reloaded.");
                 return true;
             }
 
@@ -267,7 +267,7 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
         }
     }
 
-    /** Reports the outcome of an {@link UpdateChecker} run to whoever ran {@code /customplayeradvancements update}. */
+    /** Reports the outcome of an {@link UpdateChecker} run to whoever ran {@code /customadvancementmessages update}. */
     private void sendUpdateCheckResult(CommandSender sender, UpdateChecker.Result result) {
         if (!result.isSuccess()) {
             sendMessage(sender, ChatColor.RED + "Could not check for updates: " + result.getFailureReason());
