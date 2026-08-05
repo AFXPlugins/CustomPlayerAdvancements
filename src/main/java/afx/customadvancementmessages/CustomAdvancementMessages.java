@@ -437,7 +437,7 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
             return;
         }
 
-        TextColor advancementColor = parseColor(ChatColor.getLastColors(colorizedMessage), NamedTextColor.WHITE);
+        TextColor advancementColor = type.getVanillaColor();
         advancementComponent = advancementComponent.color(advancementColor);
 
         Component rebuilt = Component.empty()
@@ -473,7 +473,7 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
         String colorizedMessage = colorizeLegacy(getMessageFormat(type));
         Component phraseComponent = LEGACY.deserialize(colorizedMessage);
 
-        TextColor advancementColor = parseColor(ChatColor.getLastColors(colorizedMessage), NamedTextColor.WHITE);
+        TextColor advancementColor = type.getVanillaColor();
 
         // The hover shows the advancement title followed by its description,
         // both colored with this type's hardcoded advancement-color, so the
@@ -598,49 +598,6 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
         return ChatColor.translateAlternateColorCodes('&', input);
     }
 
-    private TextColor parseColor(String input, TextColor fallback) {
-        if (input == null || input.isBlank()) {
-            return fallback;
-        }
-
-        String value = input.trim();
-
-        if (value.startsWith("#")) {
-            TextColor hex = TextColor.fromHexString(value);
-            if (hex != null) {
-                return hex;
-            }
-        }
-
-        if (value.startsWith("&") || value.startsWith("§")) {
-            value = value.substring(1);
-        }
-
-        if (value.isEmpty()) {
-            return fallback;
-        }
-
-        return switch (Character.toLowerCase(value.charAt(value.length() - 1))) {
-            case '0' -> NamedTextColor.BLACK;
-            case '1' -> NamedTextColor.DARK_BLUE;
-            case '2' -> NamedTextColor.DARK_GREEN;
-            case '3' -> NamedTextColor.DARK_AQUA;
-            case '4' -> NamedTextColor.DARK_RED;
-            case '5' -> NamedTextColor.DARK_PURPLE;
-            case '6' -> NamedTextColor.GOLD;
-            case '7' -> NamedTextColor.GRAY;
-            case '8' -> NamedTextColor.DARK_GRAY;
-            case '9' -> NamedTextColor.BLUE;
-            case 'a' -> NamedTextColor.GREEN;
-            case 'b' -> NamedTextColor.AQUA;
-            case 'c' -> NamedTextColor.RED;
-            case 'd' -> NamedTextColor.LIGHT_PURPLE;
-            case 'e' -> NamedTextColor.YELLOW;
-            case 'f' -> NamedTextColor.WHITE;
-            default -> fallback;
-        };
-    }
-
     private void sendMessage(CommandSender sender, String message) {
         sender.sendMessage(message);
     }
@@ -649,16 +606,21 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
         // Real vanilla advancements, chosen because they're short, familiar, and
         // safe to fake for /advancements preview — none of these touch a real
         // advancement or grant progress.
-        TASK("Diamonds!", "Acquire diamonds"),
-        GOAL("The End... Again...", "Respawn the ender dragon"),
-        CHALLENGE("Adventuring Time", "Discover every biome");
+        // Vanilla colors the bracketed advancement name itself the same way it colors
+        // an advancement's description: green for task/goal frames, purple for challenge
+        // frames. This is fixed by Minecraft and independent of the message phrase's color.
+        TASK("Diamonds!", "Acquire diamonds", NamedTextColor.GREEN),
+        GOAL("The End... Again...", "Respawn the ender dragon", NamedTextColor.GREEN),
+        CHALLENGE("Adventuring Time", "Discover every biome", NamedTextColor.DARK_PURPLE);
 
         private final String previewName;
         private final String previewDescription;
+        private final TextColor vanillaColor;
 
-        AdvancementType(String previewName, String previewDescription) {
+        AdvancementType(String previewName, String previewDescription, TextColor vanillaColor) {
             this.previewName = previewName;
             this.previewDescription = previewDescription;
+            this.vanillaColor = vanillaColor;
         }
 
         String getPreviewName() {
@@ -667,6 +629,10 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
 
         String getPreviewDescription() {
             return previewDescription;
+        }
+
+        TextColor getVanillaColor() {
+            return vanillaColor;
         }
 
         static AdvancementType fromTranslationKey(String key) {
