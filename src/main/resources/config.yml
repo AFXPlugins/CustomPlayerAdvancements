@@ -18,10 +18,11 @@
 #
 # Format for the player name in advancement messages.
 # Supports any PlaceholderAPI placeholder and '&' colors.
+# Use "{player}" for the player's username.
 
-# Default: %player_name%
+# Default: {player}
 # Example: %luckperms_prefix%%essentials_nickname%
-player-name-format: "%player_name%"
+player-name-format: "{player}"
 # ========================================================================
 
 

@@ -142,7 +142,7 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
     }
 
     private void loadSettings() {
-        nameFormat = getConfig().getString("player-name-format", "%player_name%");
+        nameFormat = getConfig().getString("player-name-format", "{player}");
 
         taskMessageFormat = buildMessageFormat("messages.task", "&fhas made the advancement", "&a");
         goalMessageFormat = buildMessageFormat("messages.goal", "&fhas reached the goal", "&a");
