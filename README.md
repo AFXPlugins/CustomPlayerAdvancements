@@ -3,9 +3,10 @@
 ## Info
 - **Display custom names with PlaceholderAPI placeholders instead of usernames in advancement messages.**
 - **Fully customize main advancment phrase text and color.**
+- **Keeps the vanilla advancement hover tooltip.**
 ## Requirements
 - [PacketEvents](https://modrinth.com/plugin/packetevents) (required - plugin functionality)
-- [PlaceholderAPI](https://modrinth.com/plugin/placeholderapi) (strongly advised - placeholder support for custom names)
+- [PlaceholderAPI](https://modrinth.com/plugin/placeholderapi) (required - placeholder support for custom names)
 
 ## Commands
 - `/advancements reload` — Reload plugin.

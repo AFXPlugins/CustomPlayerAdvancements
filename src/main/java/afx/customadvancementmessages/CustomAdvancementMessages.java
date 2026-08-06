@@ -1,5 +1,6 @@
 package afx.customadvancementmessages;
 
+import afx.customadvancementmessages.config.ConfigMigrator;
 import afx.customadvancementmessages.update.UpdateChecker;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
@@ -39,6 +40,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -51,6 +53,7 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
     private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
 
     private static final String ADMIN_PERMISSION = "customadvancementmessages.admin";
+    private static final String UPDATE_NOTIFY_PERMISSION = "customadvancementmessages.updatenotify";
 
     private final Map<String, String> decoratedNameCache = new ConcurrentHashMap<>();
     private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -76,6 +79,7 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
     public void onEnable() {
         PacketEvents.getAPI().init();
 
+        updateConfigFile();
         saveDefaultConfig();
         reloadConfig();
         loadSettings();
@@ -124,6 +128,19 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
         getLogger().info("CustomAdvancementMessages disabled.");
     }
 
+    /**
+     * Brings an existing {@code config.yml} up to date with whatever this
+     * jar version bundles — renaming keys that changed name (e.g. the old
+     * {@code plugin-version} field, now {@code config-version}) and adding
+     * any new keys introduced since the server owner last updated — while
+     * preserving their existing values and comments. No-op on a fresh
+     * install, since there's no file yet for {@link #saveDefaultConfig()}
+     * to touch.
+     */
+    private void updateConfigFile() {
+        ConfigMigrator.update(this, new File(getDataFolder(), "config.yml"), "config.yml");
+    }
+
     private void loadSettings() {
         nameFormat = getConfig().getString("player-name-format", "%player_name%");
 
@@ -170,14 +187,17 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
     }
 
     /**
-     * Messages an admin on join if a newer plugin version is already known
-     * to be available. Uses whatever {@link UpdateChecker} last found (from
-     * the startup check, or a since-run {@code /customadvancementmessages update})
-     * rather than firing a fresh Modrinth request for every join — that
-     * result is cached specifically so this stays free.
+     * Messages a player on join if a newer plugin version is already known
+     * to be available. Gated by {@link #UPDATE_NOTIFY_PERMISSION} rather
+     * than {@link #ADMIN_PERMISSION}, so who gets pinged about updates can
+     * be configured separately from who can run admin commands. Uses
+     * whatever {@link UpdateChecker} last found (from the startup check, or
+     * a since-run {@code /customadvancementmessages update}) rather than
+     * firing a fresh Modrinth request for every join — that result is
+     * cached specifically so this stays free.
      */
     private void notifyOfUpdate(Player player) {
-        if (!hasPermission(player, ADMIN_PERMISSION)) {
+        if (!hasPermission(player, UPDATE_NOTIFY_PERMISSION)) {
             return;
         }
         if (updateChecker == null) {
@@ -218,6 +238,7 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
         String sub = args[0].toLowerCase(Locale.ROOT);
         switch (sub) {
             case "reload" -> {
+                updateConfigFile();
                 reloadConfig();
                 loadSettings();
                 decoratedNameCache.clear();
@@ -350,11 +371,7 @@ public final class CustomAdvancementMessages extends JavaPlugin implements Liste
         String formatted;
 
         try {
-            if (placeholderApiEnabled) {
-                formatted = PlaceholderAPI.setPlaceholders(player, nameFormat);
-            } else {
-                formatted = player.getName();
-            }
+            formatted = PlaceholderAPI.setPlaceholders(player, nameFormat.replace("{player}", player.getName()));
         } catch (Exception ex) {
             getLogger().warning(
                     "Error resolving placeholders for "

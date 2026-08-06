@@ -1,15 +1,13 @@
 name: CustomAdvancementMessages
-version: 1.0.0
+version: 1.0.1
 main: afx.customadvancementmessages.CustomAdvancementMessages
-api-version: '26.2'
+api-version: '1.20'
 author: AFXPlugins
 description: >
   Fully customizable advancement messages.
 
 depend:
   - packetevents
-
-softdepend:
   - PlaceholderAPI
 
 commands:
@@ -23,4 +21,7 @@ commands:
 permissions:
   customadvancementmessages.admin:
     description: Allows use of all CustomAdvancementMessages commands.
+    default: op
+  customadvancementmessages.updatenotify:
+    description: Receive a message on join when a new plugin update is available.
     default: op

@@ -5,7 +5,7 @@
 
     <groupId>me.customadvancement</groupId>
     <artifactId>CustomAdvancementMessages</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>CustomAdvancementMessages</name>
     <description>Displays a PlaceholderAPI-formatted name in advancement broadcast messages</description>
 
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>26.2.build.87-stable</version>
+            <version>1.20-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
@@ -79,7 +79,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <release>25</release>
+                    <release>${maven.compiler.release}</release>
                 </configuration>
             </plugin>
         </plugins>
