@@ -15,6 +15,7 @@
 
 ## Permissions
 - `customadvancementmessages.admin` — Allows use of all CustomAdvancementMessages commands (default: OP).
+- `customadvancementmessages.updatenotify` — Receive a message on join when a new plugin update is available (default: OP).
 
 ## Wiki
 - See the [wiki](https://afxplugins.github.io/documentation/customadvancementmessages/) for detailed documentation.
